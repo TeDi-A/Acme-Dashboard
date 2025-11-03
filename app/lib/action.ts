@@ -17,7 +17,7 @@ const FormSchema = z.object({
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 
-export async function createInvoice(formData: FormData) {
+export async function createInvoice(formData: FormData): Promise<void> {
   const { customerID, amount, status } = CreateInvoice.parse({
     customerID: formData.get("customerID"),
     amount: parseFloat(formData.get("amount") as string), // Ensure amount is parsed as a number
@@ -34,9 +34,7 @@ export async function createInvoice(formData: FormData) {
     `;
   } catch (error) {
     console.error(error);
-    return {
-      message: "Database Error: Failed to Create Invoice.",
-    };
+    throw new Error("Database Error: Failed to Create Invoice.");
   }
   revalidatePath("/dashboard/invoices");
   redirect("/dashboard/invoices");
@@ -44,7 +42,10 @@ export async function createInvoice(formData: FormData) {
 
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
-export async function updateInvoice(id: string, formData: FormData) {
+export async function updateInvoice(
+  id: string,
+  formData: FormData
+): Promise<void> {
   const { customerID, amount, status } = UpdateInvoice.parse({
     customerID: formData.get("customerID"),
     amount: formData.get("amount"),
@@ -61,9 +62,7 @@ export async function updateInvoice(id: string, formData: FormData) {
     `;
   } catch (error) {
     console.error(error);
-    return {
-      message: "Database Error: Failed to Update Invoice.",
-    };
+    throw new Error("Database Error: Failed to Update Invoice.");
   }
 
   revalidatePath("/dashboard/invoices");
@@ -71,7 +70,6 @@ export async function updateInvoice(id: string, formData: FormData) {
 }
 
 export async function deleteInvoice(id: string) {
-
   await sql`DELETE FROM invoices WHERE id = ${id}`;
   revalidatePath("/dashboard/invoices");
 }
